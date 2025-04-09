@@ -34,7 +34,7 @@ device_types = [
 ]
 android_versions = ["11", "12", "13", "14"]
 regions = ["North America", "Europe", "Southeast Asia", "South America", "Africa"]
-play_pass_types = ["Free", "Basic", "Premium"]
+play_pass_types = ["None", "one_month", "monthly", "yearly"]
 days_of_week = [
     "Monday",
     "Tuesday",
@@ -102,7 +102,7 @@ def generate_batch(start_idx, end_idx):
             else base_price
         )
         transaction_type = random.choice(transaction_types)
-
+        plan = random.choice(play_pass_types)
         row = {
             "ID": i + 1,
             "Name": fake.name(),
@@ -150,7 +150,8 @@ def generate_batch(start_idx, end_idx):
             "State": state,
             "Country": country,
             "Region": random.choice(regions),
-            "Play Pass User": random.choice(play_pass_types),
+            "Play Pass Plan": plan,
+            "Play Pass User": "Yes" if plan != "None" else "No",
             "Subscription Duration": random.randint(0, 24),
             "Auto-Renew": random.choice(["Yes", "No"]),
             "App Tags": ", ".join(random.sample(app_tags, 2)),
@@ -179,7 +180,7 @@ for batch_start in tqdm(range(0, num_rows, batch_size), desc="Generating data"):
     df = pd.concat([df, batch_df], ignore_index=True)
 
 # Save to Excel with optimized engine
-df.to_excel("full_playstore_dataset_50000.xlsx", index=False, engine='openpyxl')
+df.to_excel("Data/play_data.xlsx", index=False, engine='openpyxl')
 
 # Optimized summary reporting
 def generate_summary(df):
@@ -200,62 +201,4 @@ for key, value in summary.items():
     print(f"{key}: {value}")
 
 # Generate optimized report
-from docx import Document
 
-def create_report(df, filename="output.docx"):
-    doc = Document()
-    doc.add_heading('Play Store Dataset Summary Report', level=1)
-    
-    # Add optimized summary
-    summary = generate_summary(df)
-    doc.add_heading('Key Metrics', level=2)
-    for key, value in summary.items():
-        if isinstance(value, dict):
-            doc.add_paragraph(f"{key}:")
-            for k, v in value.items():
-                doc.add_paragraph(f"  {k}: {v}", style='ListBullet')
-        else:
-            doc.add_paragraph(f"{key}: {value}")
-    
-    # Add sample data
-    doc.add_heading('Sample Data', level=2)
-    doc.add_paragraph(str(df.sample(5)))
-    
-    doc.save(filename)
-    print(f"✅ Report generated and saved as {filename}")
-
-create_report(df)
-
-# Optimized visualization
-def visualize_data(df):
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    
-    # Set style
-    sns.set_style("whitegrid")
-    
-    # Create subplots
-    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-    
-    # Plot 1: App size distribution
-    sns.histplot(df['App Size (MB)'], bins=30, kde=True, ax=axes[0,0])
-    axes[0,0].set_title('App Size Distribution')
-    
-    # Plot 2: Category distribution
-    sns.countplot(y='Category', data=df, ax=axes[0,1], 
-                 order=df['Category'].value_counts().index)
-    axes[0,1].set_title('App Categories')
-    
-    # Plot 3: Rating distribution
-    sns.boxplot(x='Category', y='Rating', data=df, ax=axes[1,0])
-    axes[1,0].set_title('Ratings by Category')
-    axes[1,0].tick_params(axis='x', rotation=45)
-    
-    # Plot 4: Time spent vs rating
-    sns.scatterplot(x='Time Spent (min)', y='Rating', data=df, ax=axes[1,1], alpha=0.3)
-    axes[1,1].set_title('Time Spent vs Rating')
-    
-    plt.tight_layout()
-    plt.show()
-
-visualize_data(df)

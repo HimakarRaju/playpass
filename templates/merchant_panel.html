@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Merchant Decision Panel</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+	</head>
+	<body class="bg-gray-100 text-gray-800 p-6">
+		<h1 class="text-2xl font-bold mb-6">🎯 Merchant Decision Panel</h1>
+
+		{% if not loaded %}
+		<div class="bg-white shadow p-4 rounded-xl">
+			<p>No recommendations yet. Trigger model to begin.</p>
+		</div>
+		{% else %} {% for rec in recommendations %}
+		<form method="POST" action="{{ url_for('send_offer') }}">
+			<input type="hidden" name="user_id" value="{{ rec['User ID'] }}" />
+
+			<label class="block mt-4 font-medium">💬 Custom Offer:</label>
+			<textarea
+				name="custom_offer"
+				class="w-full p-2 border border-gray-300 rounded mt-1"
+				rows="3"
+				placeholder="Write a custom offer..."></textarea>
+
+			<div class="flex gap-3 mt-4">
+				<button
+					type="submit"
+					class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+					>Send Offer</button
+				>
+				<button
+					type="button"
+					class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition"
+					>Skip</button
+				>
+			</div>
+		</form>
+		<!--<div class="bg-white shadow p-4 rounded-xl mt-6">
+            <h2 class="text-lg font-semibold">Recommendation Details</h2>
+            <p><strong>User ID:</strong> {{ rec['User ID'] }}</p>
+            <p><strong>Predicted Revenue:</strong> ${{ rec['Predicted Revenue'] }}</p>
+            <p><strong>Predicted Churn Probability:</strong> {{ rec['Predicted Churn Probability'] }}</p>
+            <p><strong>Recommended Action:</strong> {{ rec['Recommended Action'] }}</p>-->
+		{% endfor %} {% endif %}
+	</body>
+</html>
